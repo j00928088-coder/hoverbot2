@@ -24,81 +24,116 @@
   * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; user-select:none; }
 
   body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Rajdhani', sans-serif;
-    height: 100vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    background:var(--bg); color:var(--text);
+    font-family:'Rajdhani',sans-serif;
+    height:100vh; overflow:hidden;
+    display:flex; flex-direction:column;
   }
 
   body::before {
-    content:'';
-    position:fixed; inset:0;
+    content:''; position:fixed; inset:0;
     background-image:
-      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(rgba(0,229,255,0.03) 1px,transparent 1px),
       linear-gradient(90deg,rgba(0,229,255,0.03) 1px,transparent 1px);
     background-size:32px 32px;
     pointer-events:none; z-index:0;
   }
 
+  /* ── Header ── */
   header {
     position:relative; z-index:10;
     display:flex; align-items:center; justify-content:space-between;
-    padding:10px 14px 8px;
+    padding:8px 12px 6px;
     border-bottom:1px solid var(--border);
     background:linear-gradient(180deg,#0d1018 0%,transparent 100%);
     flex-shrink:0;
   }
-
-  .logo { font-size:20px; font-weight:700; letter-spacing:3px; color:var(--accent); text-shadow:var(--glow); }
+  .logo { font-size:18px; font-weight:700; letter-spacing:3px; color:var(--accent); text-shadow:var(--glow); }
   .logo span { color:var(--red); }
-
-  .status-bar { display:flex; align-items:center; gap:8px; font-family:'Share Tech Mono',monospace; font-size:11px; }
-
-  #status-dot {
-    width:8px; height:8px; border-radius:50%;
-    background:var(--dim); transition:all 0.3s;
-  }
-  #status-dot.connected   { background:var(--green); box-shadow:0 0 8px var(--green); }
-  #status-dot.connecting  { background:var(--orange); animation:pulse 1s infinite; }
+  .status-bar { display:flex; align-items:center; gap:6px; font-family:'Share Tech Mono',monospace; font-size:10px; }
+  #status-dot { width:7px; height:7px; border-radius:50%; background:var(--dim); transition:all 0.3s; }
+  #status-dot.connected  { background:var(--green); box-shadow:0 0 8px var(--green); }
+  #status-dot.connecting { background:var(--orange); animation:pulse 1s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
   #status-text { color:var(--dim); transition:color 0.3s; }
   #status-text.connected { color:var(--green); }
-
   #connect-btn {
     background:linear-gradient(135deg,var(--accent),#0088aa);
-    color:#000; border:none; border-radius:6px;
-    padding:6px 14px;
-    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:13px; letter-spacing:1px;
+    color:#000; border:none; border-radius:6px; padding:5px 12px;
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:12px; letter-spacing:1px;
     cursor:pointer; box-shadow:var(--glow); transition:all 0.2s;
   }
   #connect-btn:active { transform:scale(0.96); }
-  #connect-btn.connected { background:linear-gradient(135deg,var(--red),#aa0030); box-shadow:0 0 18px rgba(255,61,113,0.4); }
+  #connect-btn.connected { background:linear-gradient(135deg,var(--red),#aa0030); }
 
+  /* ── Main layout ── */
   main {
     flex:1; position:relative; z-index:10;
-    display:flex; flex-direction:column; gap:10px;
-    padding:10px 12px; overflow:hidden;
+    display:flex; flex-direction:column; gap:6px;
+    padding:6px 10px; overflow:hidden;
   }
 
-  /* Telemetry */
-  .telemetry { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; flex-shrink:0; }
-  .tele-item { background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:5px 6px; text-align:center; }
-  .tele-label { font-size:8px; letter-spacing:2px; color:var(--dim); text-transform:uppercase; }
-  .tele-val { font-family:'Share Tech Mono',monospace; font-size:15px; color:var(--accent); line-height:1.2; }
+  /* ── Camera feed ── */
+  .cam-row {
+    display:flex; gap:8px; align-items:stretch; flex-shrink:0;
+  }
 
-  /* Controls row */
-  .controls-row { display:flex; gap:12px; flex:1; align-items:center; min-height:0; }
+  .cam-wrap {
+    flex:1; position:relative;
+    background:var(--panel); border:1px solid var(--border); border-radius:8px;
+    overflow:hidden; height:130px;
+  }
+  #cam-feed {
+    width:100%; height:100%; object-fit:cover;
+    display:none;
+  }
+  #cam-feed.active { display:block; }
+  .cam-placeholder {
+    width:100%; height:100%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:4px;
+  }
+  .cam-placeholder.hidden { display:none; }
+  .cam-icon { font-size:28px; opacity:0.3; }
+  .cam-placeholder-txt { font-size:8px; color:var(--dim); font-family:'Share Tech Mono',monospace; letter-spacing:1px; }
+
+  /* Camera URL input */
+  .cam-ctrl {
+    flex:0 0 auto; display:flex; flex-direction:column; gap:5px;
+    justify-content:center; width:140px;
+  }
+  .cam-url-input {
+    background:var(--panel); border:1px solid var(--border); border-radius:6px;
+    color:var(--text); font-family:'Share Tech Mono',monospace; font-size:8px;
+    padding:5px 7px; outline:none; width:100%;
+  }
+  .cam-url-input:focus { border-color:var(--accent); }
+  .cam-url-input::placeholder { color:var(--dim); }
+  .cam-connect-btn {
+    background:var(--panel); border:1px solid var(--accent); border-radius:6px;
+    color:var(--accent); font-family:'Rajdhani',sans-serif; font-weight:700;
+    font-size:11px; letter-spacing:1px; padding:5px;
+    cursor:pointer; transition:all 0.15s; text-align:center;
+  }
+  .cam-connect-btn:active { background:rgba(0,229,255,0.15); }
+  .cam-connect-btn.streaming { border-color:var(--red); color:var(--red); }
+  #cam-status { font-size:8px; color:var(--dim); font-family:'Share Tech Mono',monospace; text-align:center; }
+  #cam-status.live { color:var(--green); }
+
+  /* ── Telemetry ── */
+  .telemetry { display:grid; grid-template-columns:repeat(4,1fr); gap:5px; flex-shrink:0; }
+  .tele-item { background:var(--panel); border:1px solid var(--border); border-radius:7px; padding:4px 5px; text-align:center; }
+  .tele-label { font-size:7px; letter-spacing:2px; color:var(--dim); text-transform:uppercase; }
+  .tele-val   { font-family:'Share Tech Mono',monospace; font-size:14px; color:var(--accent); line-height:1.2; }
+
+  /* ── Controls row ── */
+  .controls-row { display:flex; gap:10px; flex:1; align-items:center; min-height:0; }
 
   /* Joystick */
-  .joystick-wrap { flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:6px; }
-  .joystick-label { font-size:9px; letter-spacing:3px; color:var(--dim); text-transform:uppercase; }
-
+  .joystick-wrap { flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:5px; }
+  .joystick-label { font-size:8px; letter-spacing:3px; color:var(--dim); text-transform:uppercase; }
   #joystick-base {
-    width:150px; height:150px; border-radius:50%;
+    width:130px; height:130px; border-radius:50%;
     background:radial-gradient(circle at 40% 35%,#1a2535,#0d1018);
     border:2px solid var(--border);
     box-shadow:inset 0 4px 20px rgba(0,0,0,0.5);
@@ -107,12 +142,10 @@
   #joystick-base::before,#joystick-base::after { content:''; position:absolute; background:var(--border); }
   #joystick-base::before { width:1px; height:100%; left:50%; transform:translateX(-50%); }
   #joystick-base::after  { height:1px; width:100%; top:50%; transform:translateY(-50%); }
-
   #joystick-thumb {
-    width:52px; height:52px; border-radius:50%;
+    width:46px; height:46px; border-radius:50%;
     background:radial-gradient(circle at 35% 30%,#2a4060,#0d1825);
-    border:2px solid var(--accent);
-    box-shadow:var(--glow);
+    border:2px solid var(--accent); box-shadow:var(--glow);
     position:absolute; top:50%; left:50%;
     transform:translate(-50%,-50%);
     pointer-events:none; transition:box-shadow 0.15s;
@@ -120,72 +153,64 @@
   #joystick-thumb.active { box-shadow:0 0 28px rgba(0,229,255,0.8); }
 
   /* Button pad */
-  .btn-pad { flex:1; display:flex; flex-direction:column; gap:7px; }
-
-  .btn-row { display:flex; gap:7px; justify-content:center; }
-
+  .btn-pad { flex:1; display:flex; flex-direction:column; gap:6px; }
+  .btn-row  { display:flex; gap:6px; justify-content:center; }
   .ctrl-btn {
     border:none; border-radius:10px;
     font-family:'Rajdhani',sans-serif; font-weight:700; letter-spacing:1.5px;
     cursor:pointer; transition:all 0.1s;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
   }
-  .ctrl-btn:active { transform:scale(0.92); }
-
+  .ctrl-btn:active { transform:scale(0.93); }
   .dir-btn {
-    width:62px; height:62px;
+    width:56px; height:56px;
     background:var(--panel); border:1.5px solid var(--border);
-    color:var(--text); font-size:22px;
+    color:var(--text); font-size:20px;
   }
-  .dir-btn.pressed,
-  .dir-btn:active {
-    background:rgba(0,229,255,0.15);
-    border-color:var(--accent); color:var(--accent);
-    box-shadow:var(--glow);
+  .dir-btn.active {
+    background:rgba(0,229,255,0.18); border-color:var(--accent);
+    color:var(--accent); box-shadow:var(--glow);
   }
-  .dir-label { font-size:8px; letter-spacing:1px; opacity:0.6; }
-
+  .dir-label { font-size:7px; letter-spacing:1px; opacity:0.6; }
   .brake-btn {
-    width:100%; height:50px;
+    width:100%; height:44px;
     background:linear-gradient(135deg,#2a0a0a,#1a0505);
     border:1.5px solid #5a1010; color:var(--red);
-    font-size:13px; letter-spacing:3px;
+    font-size:12px; letter-spacing:3px;
   }
-  .brake-btn:active { background:linear-gradient(135deg,#5a0a0a,#3a0505); box-shadow:0 0 18px rgba(255,61,113,0.5); }
-
+  .brake-btn:active { background:linear-gradient(135deg,#5a0a0a,#3a0505); }
   .release-btn {
-    width:100%; height:38px;
+    width:100%; height:34px;
     background:linear-gradient(135deg,#0a2a0a,#051505);
     border:1.5px solid #105a10; color:var(--green);
-    font-size:11px; letter-spacing:2px;
+    font-size:10px; letter-spacing:2px;
   }
-  .release-btn:active { background:linear-gradient(135deg,#0a4a0a,#052505); box-shadow:0 0 16px rgba(0,255,136,0.4); }
+  .release-btn:active { background:linear-gradient(135deg,#0a4a0a,#052505); }
 
   /* Speed */
-  .speed-wrap { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:8px 12px; flex-shrink:0; }
-  .speed-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
-  .speed-title { font-size:9px; letter-spacing:3px; color:var(--dim); text-transform:uppercase; }
-  #speed-display { font-family:'Share Tech Mono',monospace; font-size:17px; color:var(--accent); }
-
+  .speed-wrap { background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:6px 10px; flex-shrink:0; }
+  .speed-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; }
+  .speed-title { font-size:8px; letter-spacing:3px; color:var(--dim); text-transform:uppercase; }
+  #speed-display { font-family:'Share Tech Mono',monospace; font-size:15px; color:var(--accent); }
   #speed-slider {
     -webkit-appearance:none; appearance:none;
-    width:100%; height:6px; border-radius:3px;
+    width:100%; height:5px; border-radius:3px;
     background:var(--border); outline:none;
   }
   #speed-slider::-webkit-slider-thumb {
-    -webkit-appearance:none; width:22px; height:22px; border-radius:50%;
+    -webkit-appearance:none; width:20px; height:20px; border-radius:50%;
     background:linear-gradient(135deg,var(--accent),#0088aa);
     box-shadow:var(--glow); cursor:pointer;
   }
 
   /* Special */
-  .special-row { display:grid; grid-template-columns:1fr 1fr; gap:7px; flex-shrink:0; }
+  .special-row { display:grid; grid-template-columns:1fr 1fr; gap:6px; flex-shrink:0; }
   .special-btn {
-    height:42px; background:var(--panel); border:1.5px solid var(--border);
-    border-radius:10px; color:var(--text);
-    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:11px; letter-spacing:2px;
+    height:38px; background:var(--panel); border:1.5px solid var(--border);
+    border-radius:8px; color:var(--text);
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:10px; letter-spacing:2px;
     cursor:pointer; transition:all 0.15s;
-    display:flex; align-items:center; justify-content:center; gap:5px;
+    display:flex; align-items:center; justify-content:center; gap:4px;
   }
   .special-btn:active { transform:scale(0.95); }
   .special-btn.spin   { border-color:var(--orange); color:var(--orange); }
@@ -195,9 +220,9 @@
 
   /* Log */
   #log {
-    background:var(--panel); border:1px solid var(--border); border-radius:8px;
-    padding:6px 10px; height:55px; overflow-y:auto;
-    font-family:'Share Tech Mono',monospace; font-size:9.5px; color:var(--dim);
+    background:var(--panel); border:1px solid var(--border); border-radius:7px;
+    padding:5px 8px; height:46px; overflow-y:auto;
+    font-family:'Share Tech Mono',monospace; font-size:8.5px; color:var(--dim);
     flex-shrink:0;
   }
   #log p { line-height:1.6; }
@@ -207,26 +232,44 @@
 
   /* Overlay */
   #overlay {
-    position:fixed; inset:0;
-    background:rgba(10,12,16,0.95);
-    z-index:100;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px;
+    position:fixed; inset:0; background:rgba(10,12,16,0.95);
+    z-index:100; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:16px;
     backdrop-filter:blur(6px);
   }
   #overlay.hidden { display:none; }
-  .overlay-icon { font-size:54px; animation:float 3s ease-in-out infinite; }
+  .overlay-icon  { font-size:50px; animation:float 3s ease-in-out infinite; }
   @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-  .overlay-title { font-size:26px; font-weight:700; letter-spacing:4px; color:var(--accent); text-shadow:var(--glow); }
-  .overlay-sub  { font-size:13px; color:var(--dim); letter-spacing:1px; text-align:center; padding:0 36px; line-height:1.7; }
-  #overlay-btn  {
+  .overlay-title { font-size:24px; font-weight:700; letter-spacing:4px; color:var(--accent); text-shadow:var(--glow); }
+  .overlay-sub   { font-size:12px; color:var(--dim); letter-spacing:1px; text-align:center; padding:0 32px; line-height:1.7; }
+  #overlay-btn {
     background:linear-gradient(135deg,var(--accent),#0088aa);
-    color:#000; border:none; border-radius:10px;
-    padding:13px 38px;
-    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:16px; letter-spacing:2px;
+    color:#000; border:none; border-radius:10px; padding:12px 36px;
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:15px; letter-spacing:2px;
     cursor:pointer; box-shadow:var(--glow); transition:all 0.2s;
   }
   #overlay-btn:active { transform:scale(0.96); }
-  .ble-note { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--dim); text-align:center; padding:0 28px; }
+  .ble-note { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--dim); text-align:center; padding:0 24px; }
+
+  /* LIVE badge */
+  .live-badge {
+    position:absolute; top:6px; left:6px;
+    background:var(--red); color:#fff;
+    font-family:'Share Tech Mono',monospace; font-size:8px;
+    padding:2px 6px; border-radius:3px; letter-spacing:1px;
+    animation:pulse 1.5s infinite; display:none;
+  }
+  .live-badge.visible { display:block; }
+
+  /* Fullscreen cam button */
+  .cam-fs-btn {
+    position:absolute; top:6px; right:6px;
+    background:rgba(0,0,0,0.5); border:1px solid var(--border);
+    color:var(--dim); border-radius:4px; padding:2px 6px;
+    font-size:10px; cursor:pointer; display:none;
+  }
+  .cam-fs-btn.visible { display:block; }
+  .cam-fs-btn:active { background:rgba(0,229,255,0.2); color:var(--accent); }
 </style>
 </head>
 <body>
@@ -234,9 +277,9 @@
 <div id="overlay">
   <div class="overlay-icon">🤖</div>
   <div class="overlay-title">HOVERBOT</div>
-  <div class="overlay-sub">Tap connect to pair with your<br>ESP32 over Bluetooth LE</div>
+  <div class="overlay-sub">Connect via Bluetooth LE<br>then enter camera IP to see live feed</div>
   <button id="overlay-btn" onclick="connectBLE()">CONNECT</button>
-  <div class="ble-note">Make sure HoverBot is powered on<br>Use Safari on iPhone iOS 16.4+</div>
+  <div class="ble-note">Use Safari on iPhone iOS 16.4+<br>Phone must be on same WiFi as robot for camera</div>
 </div>
 
 <header>
@@ -249,6 +292,29 @@
 </header>
 
 <main>
+
+  <!-- Camera + URL input -->
+  <div class="cam-row">
+    <div class="cam-wrap" id="cam-wrap">
+      <div class="cam-placeholder" id="cam-placeholder">
+        <div class="cam-icon">📷</div>
+        <div class="cam-placeholder-txt">CAMERA OFFLINE</div>
+        <div class="cam-placeholder-txt" style="opacity:0.5">Enter IP to connect →</div>
+      </div>
+      <img id="cam-feed" alt="HoverBot Camera">
+      <div class="live-badge" id="live-badge">● LIVE</div>
+      <button class="cam-fs-btn" id="fs-btn" onclick="toggleFullscreen()">⛶</button>
+    </div>
+
+    <div class="cam-ctrl">
+      <input type="text" id="cam-url" class="cam-url-input"
+        placeholder="192.168.1.XXX"
+        value="">
+      <button class="cam-connect-btn" id="cam-btn" onclick="toggleCamera()">▶ CONNECT CAM</button>
+      <div id="cam-status">NOT CONNECTED</div>
+    </div>
+  </div>
+
   <!-- Telemetry -->
   <div class="telemetry">
     <div class="tele-item"><div class="tele-label">SPEED</div><div class="tele-val" id="t-speed">0%</div></div>
@@ -259,40 +325,31 @@
 
   <!-- Controls -->
   <div class="controls-row">
-
-    <!-- Joystick -->
     <div class="joystick-wrap">
       <div class="joystick-label">JOYSTICK</div>
-      <div id="joystick-base">
-        <div id="joystick-thumb"></div>
-      </div>
+      <div id="joystick-base"><div id="joystick-thumb"></div></div>
     </div>
 
-    <!-- Button Pad -->
     <div class="btn-pad">
       <div class="btn-row">
         <button class="ctrl-btn dir-btn" id="btn-fwd"
-          ontouchstart="btnFwd(true)"  ontouchend="btnFwd(false)"
-          onmousedown="btnFwd(true)"   onmouseup="btnFwd(false)" onmouseleave="btnFwd(false)">
+          ontouchstart="setDir('fwd')" onmousedown="setDir('fwd')">
           ▲<div class="dir-label">FWD</div>
         </button>
       </div>
       <div class="btn-row">
         <button class="ctrl-btn dir-btn" id="btn-left"
-          ontouchstart="btnLeft(true)"  ontouchend="btnLeft(false)"
-          onmousedown="btnLeft(true)"   onmouseup="btnLeft(false)" onmouseleave="btnLeft(false)">
+          ontouchstart="setDir('left')" onmousedown="setDir('left')">
           ◀<div class="dir-label">LEFT</div>
         </button>
         <button class="ctrl-btn dir-btn" id="btn-right"
-          ontouchstart="btnRight(true)"  ontouchend="btnRight(false)"
-          onmousedown="btnRight(true)"   onmouseup="btnRight(false)" onmouseleave="btnRight(false)">
+          ontouchstart="setDir('right')" onmousedown="setDir('right')">
           ▶<div class="dir-label">RIGHT</div>
         </button>
       </div>
       <div class="btn-row">
         <button class="ctrl-btn dir-btn" id="btn-rev"
-          ontouchstart="btnRev(true)"  ontouchend="btnRev(false)"
-          onmousedown="btnRev(true)"   onmouseup="btnRev(false)" onmouseleave="btnRev(false)">
+          ontouchstart="setDir('rev')" onmousedown="setDir('rev')">
           ▼<div class="dir-label">REV</div>
         </button>
       </div>
@@ -307,7 +364,7 @@
       <span class="speed-title">SPEED</span>
       <span id="speed-display">21%</span>
     </div>
-    <input type="range" id="speed-slider" min="0" max="255" value="55" oninput="onSpeedChange(this.value)">
+    <input type="range" id="speed-slider" min="0" max="255" value="55" oninput="onSpeedSlider(this.value)">
   </div>
 
   <!-- Special -->
@@ -316,69 +373,53 @@
     <button class="special-btn patrol" ontouchstart="sendCmd('patrol')"  onmousedown="sendCmd('patrol')">🚔 PATROL</button>
   </div>
 
-  <!-- Log -->
   <div id="log"><p>Waiting for connection...</p></div>
 </main>
 
 <script>
-// ── BLE UUIDs ───────────────────────────────────────────────
+// ── BLE ─────────────────────────────────────────────────────
 const SVC_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-const TX_UUID  = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // notify  (ESP32 → phone)
-const RX_UUID  = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // write   (phone  → ESP32)
+const TX_UUID  = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
+const RX_UUID  = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
 
 let bleDevice = null;
 let rxChar    = null;
 let connected = false;
-
-// State
 let speed     = 55;
 let brakeOn   = true;
-
-// Send queue — avoid flooding BLE
-let sendQueue  = [];
-let sending    = false;
+let curDir    = null;
+let sendQueue = [];
+let sending   = false;
 
 async function flushQueue() {
-  if (sending || sendQueue.length === 0) return;
+  if (sending || !sendQueue.length) return;
   sending = true;
-  while (sendQueue.length > 0) {
+  while (sendQueue.length) {
     const cmd = sendQueue.shift();
     try {
-      await rxChar.writeValueWithoutResponse(new TextEncoder().encode(cmd + '\n'));
-      addLog('→ ' + cmd, 'tx');
-    } catch(e) {
-      addLog('err: ' + e.message, 'err');
-    }
-    await new Promise(r => setTimeout(r, 80)); // 80ms between commands
+      await rxChar.writeValueWithoutResponse(new TextEncoder().encode(cmd+'\n'));
+      addLog('→ '+cmd,'tx');
+    } catch(e){ addLog('err: '+e.message,'err'); }
+    await new Promise(r=>setTimeout(r,80));
   }
   sending = false;
 }
 
 function sendCmd(cmd) {
-  if (!connected || !rxChar) { addLog('Not connected!', 'err'); return; }
-  // Replace duplicates for speed commands to avoid queue buildup
-  if (cmd.startsWith('s')) sendQueue = sendQueue.filter(c => !c.startsWith('s'));
+  if (!connected||!rxChar){ addLog('Not connected!','err'); return; }
+  if (cmd.startsWith('s')) sendQueue = sendQueue.filter(c=>!c.startsWith('s')||c.startsWith('sp'));
   sendQueue.push(cmd);
   flushQueue();
 }
 
-function sendSeq(...cmds) {
-  cmds.forEach(c => sendQueue.push(c));
-  flushQueue();
-}
+function sendSeq(...cmds){ cmds.forEach(c=>sendQueue.push(c)); flushQueue(); }
 
-// ── Connect ─────────────────────────────────────────────────
 async function connectBLE() {
-  if (!navigator.bluetooth) {
-    alert('Web Bluetooth not supported.\nUse Safari on iPhone iOS 16.4+');
-    return;
-  }
+  if (!navigator.bluetooth){ alert('Use Safari on iPhone iOS 16.4+'); return; }
   try {
-    setStatus('connecting');
-    addLog('Scanning for HoverBot...');
+    setStatus('connecting'); addLog('Scanning for HoverBot...');
     bleDevice = await navigator.bluetooth.requestDevice({
-      filters: [{ name: 'HoverBot' }],
-      optionalServices: [SVC_UUID]
+      filters:[{name:'HoverBot'}], optionalServices:[SVC_UUID]
     });
     bleDevice.addEventListener('gattserverdisconnected', onDisconnect);
     const server  = await bleDevice.gatt.connect();
@@ -388,234 +429,292 @@ async function connectBLE() {
     await txChar.startNotifications();
     txChar.addEventListener('characteristicvaluechanged', onReceive);
     setStatus('connected');
-    addLog('Connected!', 'rx');
+    addLog('Connected!','rx');
     document.getElementById('overlay').classList.add('hidden');
-    // Safe start — release brake
-    setTimeout(() => sendCmd('r'), 500);
-  } catch(e) {
-    setStatus('disconnected');
-    addLog('Failed: ' + e.message, 'err');
-  }
+    setTimeout(()=>{ sendCmd('r'); brakeOn=false; updateBrakeTele(false); },600);
+  } catch(e){ setStatus('disconnected'); addLog('Failed: '+e.message,'err'); }
 }
 
-function onDisconnect() {
-  setStatus('disconnected');
-  rxChar = null;
-  addLog('Disconnected!', 'err');
+function onDisconnect(){
+  setStatus('disconnected'); rxChar=null;
+  addLog('Disconnected!','err');
   document.getElementById('overlay').classList.remove('hidden');
 }
 
-function onReceive(e) {
-  const val = new TextDecoder().decode(e.target.value).trim();
-  addLog('← ' + val, 'rx');
-  if (val.includes('RELEASED'))        { brakeOn = false; updateBrakeTele(false); }
-  if (val.includes('Brake: ON'))       { brakeOn = true;  updateBrakeTele(true);  }
-  if (val.includes('FORWARD'))         { document.getElementById('t-dir').textContent  = 'FWD'; }
-  if (val.includes('REVERSE'))         { document.getElementById('t-dir').textContent  = 'REV'; }
-  if (val.includes('[SPIN]'))          { document.getElementById('t-mode').textContent = 'SPIN'; }
-  if (val.includes('[PATROL]'))        { document.getElementById('t-mode').textContent = 'PAT'; }
-  if (val.includes('Done')||val.includes('resume')) { document.getElementById('t-mode').textContent = 'IDLE'; }
-}
-
-// ── Status UI ────────────────────────────────────────────────
-function setStatus(state) {
-  const dot = document.getElementById('status-dot');
-  const txt = document.getElementById('status-text');
-  const btn = document.getElementById('connect-btn');
-  dot.className = state;
-  txt.className = state === 'connected' ? 'connected' : '';
-  connected = state === 'connected';
-  if (state === 'connected') {
-    txt.textContent = 'CONNECTED';
-    btn.textContent = 'DISCONNECT';
-    btn.classList.add('connected');
-    btn.onclick = () => { bleDevice && bleDevice.gatt.disconnect(); };
-  } else {
-    txt.textContent = state === 'connecting' ? 'CONNECTING' : 'DISCONNECTED';
-    btn.textContent = state === 'connecting' ? 'CANCEL' : 'CONNECT';
-    btn.classList.remove('connected');
-    btn.onclick = connectBLE;
+function onReceive(e){
+  const val=new TextDecoder().decode(e.target.value).trim();
+  addLog('← '+val,'rx');
+  if(val.includes('RELEASED'))        { brakeOn=false; updateBrakeTele(false); }
+  if(val.includes('Brake: ON'))       { brakeOn=true;  updateBrakeTele(true); }
+  if(val.includes('FORWARD'))         { document.getElementById('t-dir').textContent='FWD'; }
+  if(val.includes('REVERSE'))         { document.getElementById('t-dir').textContent='REV'; }
+  if(val.includes('[SPIN]'))          { document.getElementById('t-mode').textContent='SPIN'; }
+  if(val.includes('[PATROL]'))        { document.getElementById('t-mode').textContent='PAT'; }
+  if(val.includes('Done')||val.includes('resume')){ document.getElementById('t-mode').textContent='IDLE'; }
+  // Auto-fill cam URL if received from 'cam' command
+  if(val.includes('http://') && val.includes('/stream')) {
+    const match = val.match(/http:\/\/[\d.]+\/stream/);
+    if(match) {
+      const ip = match[0].replace('http://','').replace('/stream','');
+      document.getElementById('cam-url').value = ip;
+      addLog('← CAM IP received: '+ip,'rx');
+    }
   }
 }
 
-function updateBrakeTele(on) {
-  const el = document.getElementById('t-brake');
-  el.textContent = on ? 'ON' : 'OFF';
-  el.style.color = on ? 'var(--red)' : 'var(--green)';
+function setStatus(state){
+  const dot=document.getElementById('status-dot');
+  const txt=document.getElementById('status-text');
+  const btn=document.getElementById('connect-btn');
+  dot.className=state; connected=(state==='connected');
+  txt.className=connected?'connected':'';
+  if(connected){
+    txt.textContent='CONNECTED'; btn.textContent='DISCONNECT';
+    btn.classList.add('connected');
+    btn.onclick=()=>{ bleDevice&&bleDevice.gatt.disconnect(); };
+  } else {
+    txt.textContent=state==='connecting'?'CONNECTING':'DISCONNECTED';
+    btn.textContent=state==='connecting'?'CANCEL':'CONNECT';
+    btn.classList.remove('connected'); btn.onclick=connectBLE;
+  }
 }
 
-function addLog(msg, type='') {
-  const el = document.getElementById('log');
-  const p  = document.createElement('p');
-  if (type) p.className = type;
-  p.textContent = msg;
-  el.appendChild(p);
-  el.scrollTop = el.scrollHeight;
-  while (el.children.length > 40) el.removeChild(el.firstChild);
+function updateBrakeTele(on){
+  const el=document.getElementById('t-brake');
+  el.textContent=on?'ON':'OFF';
+  el.style.color=on?'var(--red)':'var(--green)';
+}
+
+function addLog(msg,type=''){
+  const el=document.getElementById('log');
+  const p=document.createElement('p');
+  if(type) p.className=type;
+  p.textContent=msg; el.appendChild(p);
+  el.scrollTop=el.scrollHeight;
+  while(el.children.length>40) el.removeChild(el.firstChild);
+}
+
+// ── Camera ───────────────────────────────────────────────────
+let camStreaming = false;
+
+function toggleCamera(){
+  if(camStreaming){ stopCamera(); return; }
+  startCamera();
+}
+
+function startCamera(){
+  const ipRaw = document.getElementById('cam-url').value.trim();
+  if(!ipRaw){ addLog('Enter camera IP first','err'); return; }
+
+  // Build URL — accept raw IP, IP:port, or full URL
+  let url = ipRaw;
+  if(!url.startsWith('http')) url = 'http://'+url;
+  if(!url.endsWith('/stream')) url = url.replace(/\/?$/,'/stream');
+
+  const img = document.getElementById('cam-feed');
+  const placeholder = document.getElementById('cam-placeholder');
+  const badge = document.getElementById('live-badge');
+  const fsBtn = document.getElementById('fs-btn');
+  const camBtn = document.getElementById('cam-btn');
+  const camStatus = document.getElementById('cam-status');
+
+  camStatus.textContent = 'CONNECTING...';
+  camStatus.className = '';
+  addLog('Connecting to camera: '+url);
+
+  img.onload = () => {
+    camStreaming = true;
+    placeholder.classList.add('hidden');
+    img.classList.add('active');
+    badge.classList.add('visible');
+    fsBtn.classList.add('visible');
+    camBtn.textContent = '■ STOP CAM';
+    camBtn.classList.add('streaming');
+    camStatus.textContent = '● LIVE';
+    camStatus.className = 'live';
+    addLog('Camera stream connected!','rx');
+  };
+
+  img.onerror = () => {
+    if(camStreaming) return; // already connected, ignore errors
+    camStatus.textContent = 'FAILED — check IP';
+    camStatus.className = '';
+    addLog('Camera failed — check IP and WiFi','err');
+  };
+
+  img.src = url;
+}
+
+function stopCamera(){
+  const img = document.getElementById('cam-feed');
+  const placeholder = document.getElementById('cam-placeholder');
+  const badge = document.getElementById('live-badge');
+  const fsBtn = document.getElementById('fs-btn');
+  const camBtn = document.getElementById('cam-btn');
+  const camStatus = document.getElementById('cam-status');
+
+  img.src = '';
+  img.classList.remove('active');
+  placeholder.classList.remove('hidden');
+  badge.classList.remove('visible');
+  fsBtn.classList.remove('visible');
+  camBtn.textContent = '▶ CONNECT CAM';
+  camBtn.classList.remove('streaming');
+  camStatus.textContent = 'DISCONNECTED';
+  camStatus.className = '';
+  camStreaming = false;
+  addLog('Camera disconnected');
+}
+
+function toggleFullscreen(){
+  const wrap = document.getElementById('cam-wrap');
+  if(!document.fullscreenElement){
+    wrap.requestFullscreen && wrap.requestFullscreen();
+  } else {
+    document.exitFullscreen && document.exitFullscreen();
+  }
+}
+
+// Auto-fill cam IP — send 'cam' command to BLE to get it
+function fetchCamIP(){
+  if(connected) sendCmd('cam');
 }
 
 // ── Speed ────────────────────────────────────────────────────
-function onSpeedChange(val) {
-  speed = parseInt(val);
-  const pct = Math.round((speed * 100) / 255);
-  document.getElementById('speed-display').textContent = pct + '%';
-  document.getElementById('t-speed').textContent = pct + '%';
+function onSpeedSlider(val){
+  speed=parseInt(val);
+  const pct=Math.round((speed*100)/255);
+  document.getElementById('speed-display').textContent=pct+'%';
+  document.getElementById('t-speed').textContent=pct+'%';
+  if(!brakeOn && curDir) applyDir(curDir);
 }
 
 // ── Direction Buttons ────────────────────────────────────────
-function ensureReleased() {
-  if (brakeOn) {
-    sendCmd('r');
-    brakeOn = false;
-    updateBrakeTele(false);
+function ensureReleased(){
+  if(brakeOn){ sendCmd('r'); brakeOn=false; updateBrakeTele(false); }
+}
+
+function setDir(dir){
+  curDir=dir;
+  ensureReleased();
+  applyDir(dir);
+  highlightBtn(dir);
+}
+
+function applyDir(dir){
+  const lo=Math.max(0,Math.round(speed*0.25));
+  switch(dir){
+    case 'fwd':
+      sendCmd('d0'); sendSeq('s'+speed);
+      document.getElementById('t-dir').textContent='FWD';
+      document.getElementById('t-mode').textContent='FWD'; break;
+    case 'rev':
+      sendCmd('d1'); sendSeq('s'+speed);
+      document.getElementById('t-dir').textContent='REV';
+      document.getElementById('t-mode').textContent='REV'; break;
+    case 'left':
+      sendCmd('d0'); sendSeq('s1'+speed,'s2'+lo);
+      document.getElementById('t-dir').textContent='LEFT';
+      document.getElementById('t-mode').textContent='LEFT'; break;
+    case 'right':
+      sendCmd('d0'); sendSeq('s1'+lo,'s2'+speed);
+      document.getElementById('t-dir').textContent='RIGHT';
+      document.getElementById('t-mode').textContent='RIGHT'; break;
   }
 }
 
-function btnFwd(pressed) {
-  document.getElementById('btn-fwd').classList.toggle('pressed', pressed);
-  if (pressed) {
-    ensureReleased();
-    sendSeq('d0', 's' + speed);
-    document.getElementById('t-dir').textContent  = 'FWD';
-    document.getElementById('t-mode').textContent = 'DRIVE';
-  } else {
-    sendCmd('s0');
-    document.getElementById('t-mode').textContent = 'IDLE';
-  }
+function highlightBtn(dir){
+  ['fwd','rev','left','right'].forEach(d=>{
+    document.getElementById('btn-'+d).classList.toggle('active',d===dir);
+  });
 }
 
-function btnRev(pressed) {
-  document.getElementById('btn-rev').classList.toggle('pressed', pressed);
-  if (pressed) {
-    ensureReleased();
-    sendSeq('d1', 's' + speed);
-    document.getElementById('t-dir').textContent  = 'REV';
-    document.getElementById('t-mode').textContent = 'DRIVE';
-  } else {
-    sendCmd('s0');
-    document.getElementById('t-mode').textContent = 'IDLE';
-  }
+function clearHighlight(){
+  ['fwd','rev','left','right'].forEach(d=>{
+    document.getElementById('btn-'+d).classList.remove('active');
+  });
 }
 
-function btnLeft(pressed) {
-  document.getElementById('btn-left').classList.toggle('pressed', pressed);
-  if (pressed) {
-    ensureReleased();
-    const lo = Math.max(0, Math.round(speed * 0.25));
-    sendSeq('d0', 's1' + lo, 's2' + speed);
-    document.getElementById('t-mode').textContent = 'LEFT';
-  } else {
-    sendCmd('s0');
-    document.getElementById('t-mode').textContent = 'IDLE';
-  }
+function doBrake(){
+  sendCmd('b'); brakeOn=true; curDir=null;
+  updateBrakeTele(true); clearHighlight();
+  document.getElementById('t-mode').textContent='IDLE';
+  document.getElementById('t-speed').textContent='0%';
 }
 
-function btnRight(pressed) {
-  document.getElementById('btn-right').classList.toggle('pressed', pressed);
-  if (pressed) {
-    ensureReleased();
-    const lo = Math.max(0, Math.round(speed * 0.25));
-    sendSeq('d0', 's1' + speed, 's2' + lo);
-    document.getElementById('t-mode').textContent = 'RIGHT';
-  } else {
-    sendCmd('s0');
-    document.getElementById('t-mode').textContent = 'IDLE';
-  }
+function doRelease(){
+  sendCmd('r'); brakeOn=false; updateBrakeTele(false);
 }
 
-function doBrake() {
-  sendCmd('b');
-  brakeOn = true;
-  updateBrakeTele(true);
-  document.getElementById('t-mode').textContent = 'IDLE';
-}
-
-function doRelease() {
-  sendCmd('r');
-  brakeOn = false;
-  updateBrakeTele(false);
-}
-
-// ── JOYSTICK ─────────────────────────────────────────────────
+// ── Joystick ─────────────────────────────────────────────────
 const base  = document.getElementById('joystick-base');
 const thumb = document.getElementById('joystick-thumb');
-const RADIUS = 50;
-let jsActive = false;
-let jsTimer  = null;
-let lastCmd  = '';
+const RADIUS=46, DEADZONE=0.15;
+let jsActive=false, jsTimer=null, lastJsCmd='';
 
-function jsGetXY(e) {
-  const rect = base.getBoundingClientRect();
-  const cx = rect.left + rect.width  / 2;
-  const cy = rect.top  + rect.height / 2;
-  const touch = e.touches ? e.touches[0] : e;
-  let dx = touch.clientX - cx;
-  let dy = touch.clientY - cy;
-  const dist = Math.sqrt(dx*dx + dy*dy);
-  if (dist > RADIUS) { dx *= RADIUS/dist; dy *= RADIUS/dist; }
-  return { dx, dy };
+base.addEventListener('touchstart',jsStart,{passive:false});
+base.addEventListener('touchmove', jsMove, {passive:false});
+base.addEventListener('touchend',  jsEnd,  {passive:false});
+base.addEventListener('mousedown', jsStart);
+window.addEventListener('mousemove',e=>{if(jsActive)jsMove(e);});
+window.addEventListener('mouseup',  e=>{if(jsActive)jsEnd(e);});
+
+function getXY(e){
+  const rect=base.getBoundingClientRect();
+  const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+  const src=e.touches?e.touches[0]:e;
+  let dx=src.clientX-cx, dy=src.clientY-cy;
+  const dist=Math.sqrt(dx*dx+dy*dy);
+  if(dist>RADIUS){dx*=RADIUS/dist;dy*=RADIUS/dist;}
+  return{dx,dy};
 }
 
-function jsStart(e) {
-  e.preventDefault();
-  jsActive = true;
+function jsStart(e){
+  e.preventDefault(); jsActive=true;
   thumb.classList.add('active');
-  ensureReleased();
-  jsTimer = setInterval(jsTick, 100);
+  ensureReleased(); clearHighlight();
+  jsTimer=setInterval(jsTick,100);
 }
 
-function jsMove(e) {
-  e.preventDefault();
-  if (!jsActive) return;
-  const {dx, dy} = jsGetXY(e);
-  thumb.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-  base._jx = dx / RADIUS;
-  base._jy = -dy / RADIUS;
+function jsMove(e){
+  e.preventDefault(); if(!jsActive)return;
+  const{dx,dy}=getXY(e);
+  thumb.style.transform=`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px))`;
+  base._jx=dx/RADIUS; base._jy=-dy/RADIUS;
 }
 
-function jsEnd(e) {
-  e.preventDefault();
-  jsActive = false;
+function jsEnd(e){
+  e&&e.preventDefault(); jsActive=false;
   clearInterval(jsTimer);
   thumb.classList.remove('active');
-  thumb.style.transform = 'translate(-50%,-50%)';
-  base._jx = 0; base._jy = 0;
-  sendCmd('s0');
-  lastCmd = '';
-  document.getElementById('t-mode').textContent = 'IDLE';
+  thumb.style.transform='translate(-50%,-50%)';
+  base._jx=0; base._jy=0;
+  sendCmd('s0'); lastJsCmd='';
+  document.getElementById('t-mode').textContent='IDLE';
+  document.getElementById('t-speed').textContent='0%';
 }
 
-function jsTick() {
-  const jx = base._jx || 0;
-  const jy = base._jy || 0;
-  const deadzone = 0.12;
-  if (Math.abs(jx) < deadzone && Math.abs(jy) < deadzone) {
-    if (lastCmd !== 'stop') { sendCmd('s0'); lastCmd = 'stop'; }
+function jsTick(){
+  const jx=base._jx||0, jy=base._jy||0;
+  if(Math.abs(jx)<DEADZONE&&Math.abs(jy)<DEADZONE){
+    if(lastJsCmd!=='stop'){sendCmd('s0');lastJsCmd='stop';}
     return;
   }
-  const fwd = jy >= 0;
-  const spd = Math.round(Math.abs(jy) * speed);
-  let s1 = spd, s2 = spd;
-  if (jx >  deadzone) s1 = Math.max(0, Math.round(spd * (1 - Math.abs(jx))));
-  if (jx < -deadzone) s2 = Math.max(0, Math.round(spd * (1 - Math.abs(jx))));
-
-  const cmd = `${fwd?'d0':'d1'}-s1${s1}-s2${s2}`;
-  if (cmd === lastCmd) return;
-  lastCmd = cmd;
-
-  sendSeq(fwd ? 'd0' : 'd1', 's1' + s1, 's2' + s2);
-  document.getElementById('t-dir').textContent  = fwd ? 'FWD' : 'REV';
-  document.getElementById('t-mode').textContent = fwd ? 'FWD' : 'REV';
-  const pct = Math.round((Math.max(s1,s2)*100)/255);
-  document.getElementById('t-speed').textContent = pct + '%';
+  const fwd=jy>=0;
+  const spd=Math.round(Math.abs(jy)*speed);
+  let s1=spd,s2=spd;
+  if(jx>DEADZONE)  s2=Math.max(0,Math.round(spd*(1-Math.abs(jx))));
+  if(jx<-DEADZONE) s1=Math.max(0,Math.round(spd*(1-Math.abs(jx))));
+  const tag=`${fwd?'d0':'d1'}-${s1}-${s2}`;
+  if(tag===lastJsCmd)return;
+  lastJsCmd=tag;
+  sendCmd(fwd?'d0':'d1');
+  s1===s2?sendCmd('s'+s1):(sendCmd('s1'+s1),sendCmd('s2'+s2));
+  const pct=Math.round((Math.max(s1,s2)*100)/255);
+  document.getElementById('t-dir').textContent=fwd?'FWD':'REV';
+  document.getElementById('t-mode').textContent=fwd?'FWD':'REV';
+  document.getElementById('t-speed').textContent=pct+'%';
 }
-
-base.addEventListener('touchstart', jsStart, { passive:false });
-base.addEventListener('touchmove',  jsMove,  { passive:false });
-base.addEventListener('touchend',   jsEnd,   { passive:false });
-base.addEventListener('mousedown',  jsStart);
-base.addEventListener('mousemove',  (e) => { if(jsActive) { jsMove(e); const {dx,dy}=jsGetXY(e); thumb.style.transform=`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`; base._jx=dx/RADIUS; base._jy=-dy/RADIUS; } });
-base.addEventListener('mouseup',    jsEnd);
 </script>
 </body>
 </html>
