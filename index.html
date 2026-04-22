@@ -390,29 +390,55 @@ let brakeOn   = true;
 let curDir    = null;
 let sendQueue = [];
 let sending   = false;
+let sendTimer = null;
 
+// Batch all queued commands into ONE BLE packet — much faster
+// Commands separated by \n so ESP32 splits and runs all at once
 async function flushQueue() {
-  if (sending || !sendQueue.length) return;
+  if (sending || !sendQueue.length || !rxChar) return;
   sending = true;
-  while (sendQueue.length) {
-    const cmd = sendQueue.shift();
-    try {
-      await rxChar.writeValueWithoutResponse(new TextEncoder().encode(cmd+'\n'));
-      addLog('→ '+cmd,'tx');
-    } catch(e){ addLog('err: '+e.message,'err'); }
-    await new Promise(r=>setTimeout(r,80));
+  clearTimeout(sendTimer);
+
+  // Grab everything in queue at once
+  const batch = sendQueue.splice(0, sendQueue.length);
+  const packet = batch.join('\n') + '\n';
+
+  try {
+    await rxChar.writeValueWithoutResponse(new TextEncoder().encode(packet));
+    if (batch.length <= 3) batch.forEach(c => addLog('→ '+c,'tx'));
+    else addLog('→ ['+batch.length+' cmds]','tx');
+  } catch(e) {
+    addLog('err: '+e.message,'err');
   }
+
   sending = false;
+
+  // If more commands arrived while sending, flush again after 20ms
+  if (sendQueue.length) {
+    sendTimer = setTimeout(flushQueue, 20);
+  }
 }
 
 function sendCmd(cmd) {
   if (!connected||!rxChar){ addLog('Not connected!','err'); return; }
-  if (cmd.startsWith('s')) sendQueue = sendQueue.filter(c=>!c.startsWith('s')||c.startsWith('sp'));
+  // Deduplicate speed commands — only keep the latest
+  if (cmd.startsWith('s') && !cmd.startsWith('sp')) {
+    const prefix = cmd.match(/^s[12]?/)[0];
+    sendQueue = sendQueue.filter(c => !c.startsWith(prefix) || c.startsWith('sp'));
+  }
+  // Brake is always urgent — skip queue and send immediately
+  if (cmd === 'b') {
+    sendQueue = ['b'];
+    flushQueue();
+    return;
+  }
   sendQueue.push(cmd);
-  flushQueue();
+  // Micro-batch: wait 10ms for more commands before sending
+  clearTimeout(sendTimer);
+  sendTimer = setTimeout(flushQueue, 10);
 }
 
-function sendSeq(...cmds){ cmds.forEach(c=>sendQueue.push(c)); flushQueue(); }
+function sendSeq(...cmds){ cmds.forEach(c=>sendQueue.push(c)); clearTimeout(sendTimer); sendTimer=setTimeout(flushQueue,10); }
 
 async function connectBLE() {
   if (!navigator.bluetooth){ alert('Use Safari on iPhone iOS 16.4+'); return; }
@@ -444,20 +470,19 @@ function onDisconnect(){
 function onReceive(e){
   const val=new TextDecoder().decode(e.target.value).trim();
   addLog('← '+val,'rx');
-  if(val.includes('RELEASED'))        { brakeOn=false; updateBrakeTele(false); }
-  if(val.includes('Brake: ON'))       { brakeOn=true;  updateBrakeTele(true); }
-  if(val.includes('FORWARD'))         { document.getElementById('t-dir').textContent='FWD'; }
-  if(val.includes('REVERSE'))         { document.getElementById('t-dir').textContent='REV'; }
-  if(val.includes('[SPIN]'))          { document.getElementById('t-mode').textContent='SPIN'; }
-  if(val.includes('[PATROL]'))        { document.getElementById('t-mode').textContent='PAT'; }
+  if(val.includes('RELEASED')||val==='RELEASED') { brakeOn=false; updateBrakeTele(false); }
+  if(val.includes('BRAKE')||val==='BRAKE')        { brakeOn=true;  updateBrakeTele(true); }
+  if(val==='FWD'||val.includes('FORWARD'))        { document.getElementById('t-dir').textContent='FWD'; }
+  if(val==='REV'||val.includes('REVERSE'))        { document.getElementById('t-dir').textContent='REV'; }
+  if(val.includes('[SPIN]'))                      { document.getElementById('t-mode').textContent='SPIN'; }
+  if(val.includes('[PATROL]'))                    { document.getElementById('t-mode').textContent='PAT'; }
   if(val.includes('Done')||val.includes('resume')){ document.getElementById('t-mode').textContent='IDLE'; }
-  // Auto-fill cam URL if received from 'cam' command
   if(val.includes('http://') && val.includes('/stream')) {
     const match = val.match(/http:\/\/[\d.]+\/stream/);
     if(match) {
       const ip = match[0].replace('http://','').replace('/stream','');
       document.getElementById('cam-url').value = ip;
-      addLog('← CAM IP received: '+ip,'rx');
+      addLog('← CAM IP: '+ip,'rx');
     }
   }
 }
@@ -673,7 +698,7 @@ function jsStart(e){
   e.preventDefault(); jsActive=true;
   thumb.classList.add('active');
   ensureReleased(); clearHighlight();
-  jsTimer=setInterval(jsTick,100);
+  jsTimer=setInterval(jsTick,50);
 }
 
 function jsMove(e){
